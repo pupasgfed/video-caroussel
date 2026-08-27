@@ -15,9 +15,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,11 +32,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v4
+        with:
+          static_site_name: caroussel-maker
+
+      - name: Build
+        run: npm run build -- --base="${{ steps.pages.outputs.base_path }}/"
+        env:
+          CI: true
+
+      - name: Add .nojekyll
+        run: touch dist/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
